@@ -7,6 +7,7 @@ import { Login } from "../pages/Login";
 import { Logout } from "../pages/Logout";
 import { AuthLayout } from "../layouts/Auth";
 import { AppLayout } from "../layouts/App";
+import { NotFound } from "../pages/NotFound";
 
 export const AppRouter = () => {
   return (
@@ -35,6 +36,7 @@ export const AppRouter = () => {
             }
           />
         </Route>
+        <Route path="*" element={<NotFound/>}/>
       </Routes>
     </BrowserRouter>
   );
