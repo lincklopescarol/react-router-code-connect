@@ -4,16 +4,18 @@ export const http = axios.create({
   baseURL: "http://localhost:3000",
 });
 
-http.interceptors.request.use(function (config) {
-  const token = localStorage.getItem('access_token')
+http.interceptors.request.use(
+  function (config) {
+    const token = localStorage.getItem("access_token");
 
-  if(token) {
-    config.headers = {
-            Authorization: `Bearer ${token}`,
+    if (token) {
+      config.headers = {
+        Authorization: `Bearer ${token}`,
+      };
     }
-  }
- return config
-
-}, function (error) {
-  return Promise.reject(error)
-})
+    return config;
+  },
+  function (error) {
+    return Promise.reject(error);
+  },
+);
