@@ -11,7 +11,7 @@ import { Textarea } from "../../Textarea";
 import { http } from "../../api";
 import { useAuth } from "../../hooks/useAuth";
 
-export const ModalComment = ({ isEditing, onSuccess, postId }) => {
+export const ModalComment = ({ isEditing, onSuccess, postId, defaultValue = '', commentId}) => {
   const modalRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth();
@@ -23,16 +23,19 @@ export const ModalComment = ({ isEditing, onSuccess, postId }) => {
 
     try {
       setLoading(true);
-      http
-        .post(
-          `/comments/post/${postId}`,
-          { text },
-        )
-        .then((response) => {
+      if (isEditing) {
+        http.patch(`/comments/${commentId}`, { text }).then((response) => {
           modalRef.current.closeModal();
           onSuccess(response.data);
           setLoading(false);
         });
+      } else {
+        http.post(`/comments/post/${postId}`, { text }).then((response) => {
+          modalRef.current.closeModal();
+          onSuccess(response.data);
+          setLoading(false);
+        });
+      }
     } catch (error) {
       console.error("Erro ao criar/atualizar comentário:", error);
     }
@@ -51,6 +54,7 @@ export const ModalComment = ({ isEditing, onSuccess, postId }) => {
             rows={8}
             name="text"
             placeholder="Digite aqui..."
+            defaultValue={isEditing}
           />
           <div className={styles.footer}>
             <Button disabled={loading} type="submit">
@@ -58,6 +62,7 @@ export const ModalComment = ({ isEditing, onSuccess, postId }) => {
                 <Spinner />
               ) : (
                 <>
+                  {" "}
                   {isEditing ? "Atualizar" : "Comentar"} <IconArrowFoward />
                 </>
               )}
@@ -65,7 +70,10 @@ export const ModalComment = ({ isEditing, onSuccess, postId }) => {
           </div>
         </form>
       </Modal>
-      <IconButton onClick={() => modalRef.current.openModal()} disabled={!isAuthenticated}>
+      <IconButton
+        onClick={() => modalRef.current.openModal()}
+        disabled={!isAuthenticated}
+      >
         <IconChat fill={isEditing ? "#000" : "#888888"} />
       </IconButton>
     </>

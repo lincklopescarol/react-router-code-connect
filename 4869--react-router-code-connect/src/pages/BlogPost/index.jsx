@@ -1,7 +1,5 @@
 import styles from "./blogpost.module.css";
 import { ThumbsUpButton } from "../../components/CardPost/ThumbsUpButton";
-import { IconButton } from "../../components/IconButton";
-import { IconChat } from "../../components/icons/IconChat";
 import { Author } from "../../components/Author";
 import Typography from "../../components/Typography";
 import { CommentList } from "../../components/CommentList";
@@ -10,19 +8,18 @@ import { useNavigate, useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { ModalComment } from "../../components/ModalComment";
 import { http } from "../../api";
+import { usePostInteractions } from "../../hooks/usePostInteraction";
 
 export const BlogPost = () => {
   const { slug } = useParams();
   const [post, setPost] = useState(null);
   const navigate = useNavigate();
+  const {likes, comments, handleLikeButton, handleNewComment, handleDeleteComment} = usePostInteractions(post)
 
   useEffect(() => {
     http
       .get(`blog-posts/slug/${slug}`)
       .then((response) => {
-        if (response.status === 404) {
-          return;
-        }
         setPost(response.data);
       })
       .catch((error) => {
@@ -54,12 +51,12 @@ export const BlogPost = () => {
         <footer className={styles.footer}>
           <div className={styles.actions}>
             <div className={styles.action}>
-              <ThumbsUpButton loading={false} />
-              <p>{post.likes}</p>
+              <ThumbsUpButton loading={false} onClick={() => handleLikeButton(post.id)} />
+              <p>{likes}</p>
             </div>
             <div className={styles.action}>
-              <ModalComment />
-              <p>{post.comments.length}</p>
+              <ModalComment onSuccess={handleNewComment} postId={post.id} />
+              <p>{comments.length}</p>
             </div>
           </div>
           <Author author={post.author} />
@@ -69,7 +66,7 @@ export const BlogPost = () => {
       <div className={styles.code}>
         <ReactMarkdown>{post.markdown}</ReactMarkdown>
       </div>
-      <CommentList comments={post.comments} />
+      <CommentList comments={comments} onDelete={handleDeleteComment} />
     </main>
   );
 };
